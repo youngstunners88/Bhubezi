@@ -111,7 +111,7 @@ const FeedbackHub: React.FC<Props> = ({ user, isOpen, onClose, suggestions, faqs
       <header className="p-6 bg-yellow-400 border-b-4 border-black flex justify-between items-center shadow-xl">
         <div className="flex items-center gap-3">
           <div className="bg-black text-yellow-400 p-1.5 rounded-lg font-black italic text-xl shadow-[3px_3px_0_0_rgba(0,0,0,1)]">B</div>
-          <h2 className="text-2xl font-black tracking-tighter text-black uppercase italic">BOOBER BACKEND</h2>
+          <h2 className="text-2xl font-black tracking-tighter text-black uppercase italic">BHUBEZI BACKEND</h2>
         </div>
         <button onClick={onClose} className="bg-white p-2 rounded-xl border-2 border-black shadow-[4px_4px_0_0_rgba(0,0,0,1)] active:scale-90"><X size={24}/></button>
       </header>
@@ -357,4 +357,4 @@ const FeedbackHub: React.FC<Props> = ({ user, isOpen, onClose, suggestions, faqs
   );
 };
 
-export default FeedbackHub;
+export default React.memo(FeedbackHub);

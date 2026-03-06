@@ -1,5 +1,36 @@
 import { useState, useCallback, useEffect, useRef } from 'react';
 
+/**
+ * useGeolocation Hook
+ * 
+ * A React hook for accessing and managing the browser's geolocation API.
+ * Provides real-time position tracking, permission management, and coordinate
+ * conversion for the Johannesburg area (app-specific 0-100 scale).
+ * 
+ * @returns {Object} Geolocation state and control methods
+ * @returns {GeoPosition|null} position - Current geographic position
+ * @returns {GeoError|null} error - Any geolocation error that occurred
+ * @returns {boolean} isTracking - Whether continuous tracking is active
+ * @returns {PermissionState|null} permission - Current permission state
+ * @returns {Object|null} appCoords - Position converted to app coordinates (x, y 0-100)
+ * @returns {Function} getCurrentPosition - Get position once (returns Promise)
+ * @returns {Function} startTracking - Start continuous position tracking
+ * @returns {Function} stopTracking - Stop continuous tracking
+ * @returns {Function} requestPermission - Explicitly request geolocation permission
+ * 
+ * @example
+ * const { position, error, isTracking, startTracking, stopTracking } = useGeolocation();
+ * 
+ * // Get position once
+ * const pos = await getCurrentPosition();
+ * 
+ * // Start continuous tracking
+ * startTracking((newPos) => console.log('New position:', newPos));
+ * 
+ * // Stop tracking
+ * stopTracking();
+ */
+
 export interface GeoPosition {
   latitude: number;
   longitude: number;

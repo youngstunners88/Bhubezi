@@ -423,4 +423,4 @@ const MarshalDashboard: React.FC<Props> = ({
   );
 };
 
-export default MarshalDashboard;
+export default React.memo(MarshalDashboard);

@@ -78,6 +78,9 @@ const ChartStyle = ({ id, config }: { id: string; config: ChartConfig }) => {
     return null
   }
 
+  // SECURITY WARNING: dangerouslySetInnerHTML is used here for CSS theming only.
+  // The config object should NEVER contain user-generated data as it could lead to XSS.
+  // This is shadcn/ui generated code with internally controlled theme configuration.
   return (
     <style
       dangerouslySetInnerHTML={{

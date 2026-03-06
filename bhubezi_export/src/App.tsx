@@ -614,7 +614,7 @@ const App: React.FC = () => {
       <header className="bg-yellow-400 p-5 shadow-md flex justify-between items-center sticky top-0 z-50 border-b-4 border-black">
         <button onClick={() => setShowFeedbackHub(true)} className="flex items-center gap-3 active:scale-95 transition-transform group">
           <div className="bg-black text-yellow-400 p-1.5 rounded-lg font-black italic text-2xl shadow-[3px_3px_0_0_rgba(0,0,0,1)] group-hover:bg-yellow-500 group-hover:text-black transition-all">B</div>
-          <h1 className="text-3xl font-black tracking-tighter text-black uppercase italic">BOOBER</h1>
+          <h1 className="text-3xl font-black tracking-tighter text-black uppercase italic">BHUBEZI</h1>
         </button>
         <div className="flex items-center gap-2">
           <button

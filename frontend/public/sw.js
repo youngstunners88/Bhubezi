@@ -1,9 +1,9 @@
-const CACHE_NAME = 'boober-v1';
+const CACHE_NAME = 'bhubezi-v1';
 const STATIC_ASSETS = [
   '/',
   '/index.html',
   '/manifest.json',
-  '/boober-icon.svg'
+  '/bhubezi-icon.svg'
 ];
 
 // Install event - cache static assets
@@ -107,8 +107,8 @@ self.addEventListener('push', (event) => {
     event.waitUntil(
       self.registration.showNotification(data.title, {
         body: data.body,
-        icon: '/boober-icon-192.png',
-        badge: '/boober-icon-72.png',
+        icon: '/bhubezi-icon-192.png',
+        badge: '/bhubezi-icon-72.png',
         tag: data.tag,
         requireInteraction: true
       })

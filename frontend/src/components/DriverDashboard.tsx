@@ -147,7 +147,7 @@ const DriverDashboard: React.FC<Props> = ({
           setMyCoords(coords);
           onLocationUpdate(coords);
         },
-        (_err) => { console.log('Using default location'); },
+        () => { /* Using default location */ },
         { enableHighAccuracy: true, timeout: 5000 }
       );
     } else {
@@ -605,4 +605,4 @@ const DriverDashboard: React.FC<Props> = ({
   );
 };
 
-export default DriverDashboard;
+export default React.memo(DriverDashboard);

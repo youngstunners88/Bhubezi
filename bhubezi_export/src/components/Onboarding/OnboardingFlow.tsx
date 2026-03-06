@@ -96,7 +96,7 @@ const OnboardingFlow: React.FC<Props> = ({ onComplete }) => {
     setError(null);
     setTimeout(() => {
       if (vehicle.type === 'SEDAN') {
-        setError("BOOBER DENIED: Only official Minibus Taxis allowed.");
+        setError("BHUBEZI DENIED: Only official Minibus Taxis allowed.");
         setIsProcessing(false);
       } else {
         setIsProcessing(false);
@@ -137,7 +137,7 @@ const OnboardingFlow: React.FC<Props> = ({ onComplete }) => {
         {step === 1 && (
           <div className="space-y-6 animate-in slide-in-from-bottom-4">
             <div className="text-center">
-              <h1 className="text-5xl font-black italic uppercase tracking-tighter text-black mb-2">BOOBER</h1>
+              <h1 className="text-5xl font-black italic uppercase tracking-tighter text-black mb-2">BHUBEZI</h1>
               <p className="text-sm font-black text-black/60 uppercase tracking-widest">Jozi's #1 Taxi Network</p>
             </div>
             <h2 className="text-2xl font-black italic uppercase tracking-tighter text-black text-center">Sho!<br/>WHO ARE YOU?</h2>

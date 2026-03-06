@@ -1,4 +1,5 @@
 import React, { useState, useMemo, useEffect } from 'react';
+import { v4 as uuidv4 } from 'uuid';
 import type { UserProfile, RoutePath, ActivePing, RankStatus, TrafficLevel, DriverStatus, MarshalInfo, ChatMessage, Review } from '../types';
 import { UserRole } from '../types';
 import { TAXI_RANKS, POINT_VALUES } from '../constants';
@@ -107,6 +108,10 @@ const PassengerDashboard: React.FC<Props> = ({ user, addPoints, routes, onPing, 
       setSelectedRank('');
       
       // Then try to get precise GPS in background
+      if (!navigator.geolocation) {
+        console.log('Geolocation not supported');
+        return;
+      }
       navigator.geolocation.getCurrentPosition(
         (pos) => {
           const { latitude: lat, longitude: lng } = pos.coords;
@@ -114,7 +119,7 @@ const PassengerDashboard: React.FC<Props> = ({ user, addPoints, routes, onPing, 
           const y = (1 - (lat + 26.3) / 0.2) * 100;
           setMyCoords({ x: Math.max(0, Math.min(100, x)), y: Math.max(0, Math.min(100, y)) });
         },
-        (_err) => { console.log('Using default location'); },
+        () => { /* Using default location */ },
         { enableHighAccuracy: true, timeout: 5000 }
       );
     } else {
@@ -126,7 +131,7 @@ const PassengerDashboard: React.FC<Props> = ({ user, addPoints, routes, onPing, 
   const pingTaxi = () => {
     if (!destinationRank && !useCustomDest) return alert('Select destination first!');
     setIsWaiting(true);
-    const pingId = Math.random().toString(36).substr(2, 9);
+    const pingId = uuidv4().slice(0, 9); // SECURITY FIX: Using uuid instead of Math.random()
     onPing({ id: pingId, passengerId: user.id, passengerName: user.name, rankId: selectedRank || undefined, customCoords: myCoords || undefined, isCustom: useMyLocation, timestamp: Date.now() });
     setCurrentPingId(pingId);
   };
@@ -614,4 +619,4 @@ const PassengerDashboard: React.FC<Props> = ({ user, addPoints, routes, onPing, 
   );
 };
 
-export default PassengerDashboard;
+export default React.memo(PassengerDashboard);

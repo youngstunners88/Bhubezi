@@ -13,6 +13,7 @@ export default defineConfig({
     },
   },
   server: {
-    allowedHosts: true,
+    // SECURITY FIX: Restrict allowed hosts instead of allowing all
+    allowedHosts: ['localhost', '127.0.0.1', 'bhubezi.co.za'],
   },
 });

@@ -1,4 +1,5 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
+import { v4 as uuidv4 } from 'uuid';
 import type { UserProfile, ActivePing, RoutePath, RankStatus, DriverStatus, ChatMessage, SocialPost, Suggestion, FAQ, LogEntry, UserRoleType, Review, MarshalInfo } from './types';
 import { UserRole, OnboardingStatus } from './types';
 import { TAXI_RANKS, INITIAL_ROUTES, POINT_VALUES, BIBLE_VERSES } from './constants';
@@ -16,6 +17,43 @@ import { useContentModeration } from './hooks/useContentModeration';
 import { useOfflineStorage } from './hooks/useOfflineStorage';
 import { useGeolocation } from './hooks/useGeolocation';
 
+// Static data - defined outside component to prevent recreation on every render
+const INITIAL_OTHER_DRIVERS: { id: string; name: string; coords: {x: number, y: number} }[] = [
+  { id: 'driver_1', name: 'Baba Joe', coords: { x: 30, y: 45 } },
+  { id: 'driver_2', name: 'Sis Thuli', coords: { x: 55, y: 60 } },
+  { id: 'driver_3', name: 'Malume John', coords: { x: 70, y: 35 } },
+];
+
+const INITIAL_MARSHALS: MarshalInfo[] = [
+  { id: 'marshal_1', name: 'Baba Joe', rankId: 'bree', rankName: 'Bree Street', rating: 4.8, isOnline: true },
+  { id: 'marshal_2', name: 'Sis Thuli', rankId: 'bree', rankName: 'Bree Street', rating: 4.9, isOnline: true },
+  { id: 'marshal_3', name: 'Malume John', rankId: 'noord', rankName: 'Noord Street', rating: 4.7, isOnline: true },
+  { id: 'marshal_4', name: 'Bra Peter', rankId: 'park', rankName: 'Park Station', rating: 4.6, isOnline: false },
+];
+
+const INITIAL_SUGGESTIONS: Suggestion[] = [
+  { id: '1', userId: 'system', userName: 'Bhubezi Bot', content: 'We need a dark mode for night trips!', type: 'IMPROVE', timestamp: Date.now() }
+];
+
+const INITIAL_FAQS: FAQ[] = [
+  { id: '1', question: 'How much is the fare from Bree to Bara?', timestamp: Date.now(), verifiedBy: [], verificationCount: 0 },
+  { id: '2', question: 'Where is the best rank for Soweto taxis?', answer: 'Noord is best for Soweto, boss. Always moving.', answeredBy: 'Baba Joe', timestamp: Date.now(), verifiedBy: [], verificationCount: 0 }
+];
+
+const INITIAL_POSTS: SocialPost[] = [
+  {
+    id: '1',
+    author: 'JoziKing',
+    authorId: 'u_jk',
+    content: 'Bree Rank is moving sharp today! No queues for Bara.',
+    isAnonymous: false,
+    timestamp: Date.now() - 1800000,
+    likes: 24,
+    likedBy: [],
+    replies: [{ id: 'r1', author: 'Bhubezi Bot', authorId: 'bot', content: 'Sharp! Keep it moving, Boss.', timestamp: Date.now() - 1500000 }]
+  }
+];
+
 const App: React.FC = () => {
   const [isOnboarded, setIsOnboarded] = useState(false);
   const [role, setRole] = useState<UserRoleType>(UserRole.PASSENGER);
@@ -31,7 +69,7 @@ const App: React.FC = () => {
   const { startTracking, stopTracking, isTracking } = useGeolocation();
 
   const [user, setUser] = useState<UserProfile>({
-    id: 'user_' + Math.random().toString(36).substr(2, 5),
+    id: 'user_' + uuidv4().slice(0, 8), // SECURITY FIX: Using uuid instead of Math.random()
     name: '',
     role: UserRole.PASSENGER,
     points: 0,
@@ -55,45 +93,15 @@ const App: React.FC = () => {
   const [routes, setRoutes] = useState<RoutePath[]>(INITIAL_ROUTES);
   const [activePings, setActivePings] = useState<ActivePing[]>([]);
   const [globalDriverStatus, setGlobalDriverStatus] = useState<DriverStatus | null>(null);
-  const [otherDriversOnRoute] = useState<{ id: string; name: string; coords: {x: number, y: number} }[]>([
-    { id: 'driver_1', name: 'Baba Joe', coords: { x: 30, y: 45 } },
-    { id: 'driver_2', name: 'Sis Thuli', coords: { x: 55, y: 60 } },
-    { id: 'driver_3', name: 'Malume John', coords: { x: 70, y: 35 } },
-  ]);
+  const [otherDriversOnRoute] = useState(INITIAL_OTHER_DRIVERS);
+  const [marshals] = useState(INITIAL_MARSHALS);
   const [chatMessages, setChatMessages] = useState<ChatMessage[]>([]);
   const [rankStatuses, setRankStatuses] = useState<Record<string, RankStatus>>({});
-  const [, setReviews] = useState<Review[]>([]);
+  const [_reviews, setReviews] = useState<Review[]>([]);
   
-  // Mock marshals for demo
-  const [marshals] = useState<MarshalInfo[]>([
-    { id: 'marshal_1', name: 'Baba Joe', rankId: 'bree', rankName: 'Bree Street', rating: 4.8, isOnline: true },
-    { id: 'marshal_2', name: 'Sis Thuli', rankId: 'bree', rankName: 'Bree Street', rating: 4.9, isOnline: true },
-    { id: 'marshal_3', name: 'Malume John', rankId: 'noord', rankName: 'Noord Street', rating: 4.7, isOnline: true },
-    { id: 'marshal_4', name: 'Bra Peter', rankId: 'park', rankName: 'Park Station', rating: 4.6, isOnline: false },
-  ]);
-  
-  const [suggestions, setSuggestions] = useState<Suggestion[]>([
-    { id: '1', userId: 'system', userName: 'Bhubezi Bot', content: 'We need a dark mode for night trips!', type: 'IMPROVE', timestamp: Date.now() }
-  ]);
-  
-  const [faqs, setFaqs] = useState<FAQ[]>([
-    { id: '1', question: 'How much is the fare from Bree to Bara?', timestamp: Date.now(), verifiedBy: [], verificationCount: 0 },
-    { id: '2', question: 'Where is the best rank for Soweto taxis?', answer: 'Noord is best for Soweto, boss. Always moving.', answeredBy: 'Baba Joe', timestamp: Date.now(), verifiedBy: [], verificationCount: 0 }
-  ]);
-  
-  const [posts, setPosts] = useState<SocialPost[]>([
-    {
-      id: '1',
-      author: 'JoziKing',
-      authorId: 'u_jk',
-      content: 'Bree Rank is moving sharp today! No queues for Bara.',
-      isAnonymous: false,
-      timestamp: Date.now() - 1800000,
-      likes: 24,
-      likedBy: [],
-      replies: [{ id: 'r1', author: 'Bhubezi Bot', authorId: 'bot', content: 'Sharp! Keep it moving, Boss.', timestamp: Date.now() - 1500000 }]
-    }
-  ]);
+  const [suggestions, setSuggestions] = useState<Suggestion[]>(INITIAL_SUGGESTIONS);
+  const [faqs, setFaqs] = useState<FAQ[]>(INITIAL_FAQS);
+  const [posts, setPosts] = useState<SocialPost[]>(INITIAL_POSTS);
   
   const [_marshalsPendingApproval, setMarshalsPendingApproval] = useState<UserProfile[]>([]);
 
@@ -126,7 +134,7 @@ const App: React.FC = () => {
         }
       }
     }
-  }, [isOnboarded]);
+  }, [isOnboarded, user.lastActiveDate, user.currentStreak]);
 
   // Check if user is suspended
   useEffect(() => {
@@ -143,7 +151,7 @@ const App: React.FC = () => {
 
   const addLog = (action: string, points: number) => {
     const entry: LogEntry = {
-      id: Math.random().toString(36).substr(2, 9),
+      id: uuidv4().slice(0, 9), // SECURITY FIX: Using uuid instead of Math.random()
       action,
       timestamp: Date.now(),
       pointsEarned: points
@@ -172,7 +180,7 @@ const App: React.FC = () => {
     const newUser = {
       ...user,
       ...onboardedUser,
-      id: 'user_' + Math.random().toString(36).substr(2, 5),
+      id: 'user_' + uuidv4().slice(0, 8), // SECURITY FIX: Using uuid instead of Math.random()
       isVerified: onboardedUser.role === UserRole.DRIVER,
       onboardingStatus: onboardedUser.onboardingStatus!,
       role: onboardedUser.role!,
@@ -293,7 +301,7 @@ const App: React.FC = () => {
     }
 
     const newMessage: ChatMessage = {
-      id: Math.random().toString(36).substr(2, 9),
+      id: uuidv4().slice(0, 9), // SECURITY FIX: Using uuid instead of Math.random()
       senderId: user.id,
       senderName: user.name,
       role: user.role,
@@ -350,14 +358,14 @@ const App: React.FC = () => {
     }));
   };
 
-  const handleConfirmPickup = (pingId: string, userRole: UserRoleType) => {
+  const handleConfirmPickup = useCallback((pingId: string, userRole: UserRoleType) => {
     setActivePings(prev => prev.filter(p => p.id !== pingId));
     if (userRole === UserRole.PASSENGER) {
       addPoints(POINT_VALUES.PASSENGER_CONFIRM_PICKUP);
     } else if (userRole === UserRole.DRIVER) {
       addPoints(POINT_VALUES.DRIVER_CONFIRM_PICKUP);
     }
-  };
+  }, [addPoints]);
 
   const handleConfirmDelivery = () => {
     if (user.role === UserRole.PASSENGER) {
@@ -368,7 +376,7 @@ const App: React.FC = () => {
 
   const handleSubmitSuggestion = (s: Partial<Suggestion>) => {
     const newSug: Suggestion = {
-      id: Math.random().toString(36).substr(2, 5),
+      id: uuidv4().slice(0, 5),
       userId: user.id,
       userName: user.name,
       content: s.content!,
@@ -425,6 +433,7 @@ const App: React.FC = () => {
   };
 
   const handleVerifyAnswer = (faqId: string, _isCorrect: boolean, corrections?: string, priceUpdate?: { routeId: string; newPrice: number }) => {
+    // _isCorrect parameter kept for API compatibility but not used in current implementation
     setFaqs(prev => prev.map(f => {
       if (f.id === faqId) {
         const currentVerified = f.verifiedBy || [];
@@ -493,18 +502,22 @@ const App: React.FC = () => {
     addPoints(10);
   };
 
-  const handleEnableGeoTracking = () => {
+  const handleEnableGeoTracking = useCallback(() => {
     const success = startTracking();
     if (success) {
       setUser(prev => ({ ...prev, geoTrackingEnabled: true }));
       setShowGeoModal(false);
     }
-  };
+  }, [startTracking]);
 
-  const handleDisableGeoTracking = () => {
+  const handleDisableGeoTracking = useCallback(() => {
     stopTracking();
     setUser(prev => ({ ...prev, geoTrackingEnabled: false }));
-  };
+  }, [stopTracking]);
+
+  const handleCloseTutorial = useCallback(() => {
+    setShowTutorial(false);
+  }, []);
 
   if (!isOnboarded) {
     return <OnboardingFlow onComplete={handleOnboardingComplete} />;
@@ -530,7 +543,7 @@ const App: React.FC = () => {
               onUploadWash={handleUploadWash}
               onApproveMarshal={handleApproveMarshal}
               showTutorial={showTutorial}
-              onCloseTutorial={() => setShowTutorial(false)}
+              onCloseTutorial={handleCloseTutorial}
               isOnline={isOnline}
               otherDriversOnRoute={otherDriversOnRoute}
               onAcceptPing={handleAcceptPing}
@@ -564,7 +577,7 @@ const App: React.FC = () => {
               heroDriverStatus={globalDriverStatus}
               onCheatingDetected={() => triggerError("Warning: Check Location Consistency.")}
               showTutorial={showTutorial}
-              onCloseTutorial={() => setShowTutorial(false)}
+              onCloseTutorial={handleCloseTutorial}
               isOnline={isOnline}
               marshals={marshals}
               messages={chatMessages}
@@ -593,6 +606,7 @@ const App: React.FC = () => {
     }
   };
 
+  // SECURITY NOTE: Math.random() is acceptable here for non-cryptographic UI randomization (Bible verse selection)
   const randomVerse = BIBLE_VERSES[Math.floor(Math.random() * BIBLE_VERSES.length)];
 
   return (

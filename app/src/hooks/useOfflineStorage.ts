@@ -26,7 +26,7 @@ export function useOfflineStorage() {
   }, []);
 
   useEffect(() => {
-    const stored = localStorage.getItem('boober_offline_queue');
+    const stored = localStorage.getItem('bhubezi_offline_queue');
     if (stored) {
       try {
         setPendingActions(JSON.parse(stored));
@@ -38,7 +38,7 @@ export function useOfflineStorage() {
 
   const saveOfflineData = useCallback((data: OfflineData) => {
     try {
-      localStorage.setItem('boober_offline_data', JSON.stringify(data));
+      localStorage.setItem('bhubezi_offline_data', JSON.stringify(data));
       return true;
     } catch (e) {
       console.error('Failed to save offline data:', e);
@@ -48,7 +48,7 @@ export function useOfflineStorage() {
 
   const loadOfflineData = useCallback((): OfflineData | null => {
     try {
-      const stored = localStorage.getItem('boober_offline_data');
+      const stored = localStorage.getItem('bhubezi_offline_data');
       if (stored) {
         return JSON.parse(stored);
       }
@@ -67,7 +67,7 @@ export function useOfflineStorage() {
     
     setPendingActions(prev => {
       const updated = [...prev, newAction];
-      localStorage.setItem('boober_offline_queue', JSON.stringify(updated));
+      localStorage.setItem('bhubezi_offline_queue', JSON.stringify(updated));
       return updated;
     });
     
@@ -77,13 +77,13 @@ export function useOfflineStorage() {
   const removeQueuedAction = useCallback((actionId: string) => {
     setPendingActions(prev => {
       const updated = prev.filter(a => a.id !== actionId);
-      localStorage.setItem('boober_offline_queue', JSON.stringify(updated));
+      localStorage.setItem('bhubezi_offline_queue', JSON.stringify(updated));
       return updated;
     });
   }, []);
 
   const clearQueue = useCallback(() => {
-    localStorage.removeItem('boober_offline_queue');
+    localStorage.removeItem('bhubezi_offline_queue');
     setPendingActions([]);
   }, []);
 
@@ -105,7 +105,7 @@ export function useOfflineStorage() {
 
     setPendingActions(prev => {
       const updated = prev.filter(a => !successful.includes(a.id));
-      localStorage.setItem('boober_offline_queue', JSON.stringify(updated));
+      localStorage.setItem('bhubezi_offline_queue', JSON.stringify(updated));
       return updated;
     });
 

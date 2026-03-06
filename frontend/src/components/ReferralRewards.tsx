@@ -9,9 +9,9 @@ interface Props {
 
 const ReferralRewards: React.FC<Props> = ({ userId, onReferral }) => {
   const [copied, setCopied] = React.useState(false);
-  const referralLink = `https://boober.jozi/ref/${userId}`;
+  const referralLink = `https://bhubez.co.za/ref/${userId}`;
   
-  const brandedMessage = `BOOBER - SA's #1 Taxi Network
+  const brandedMessage = `BHUBEZI - SA's #1 Taxi Network
 
 Join me on Bhubezi and track routes live. Score rewards for every trip! ${referralLink}
 
@@ -60,8 +60,8 @@ Sharp!`;
     textArea.select();
     try {
       document.execCommand('copy');
-    } catch (err) {
-      console.error('Fallback copy failed', err);
+    } catch {
+      // Fallback copy failed - silently fail
     }
     document.body.removeChild(textArea);
   };
@@ -81,11 +81,11 @@ Sharp!`;
         </div>
         <div>
           <h4 className="text-xl font-black italic uppercase tracking-tighter leading-none">REFERRAL REWARDS</h4>
-          <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest mt-1">BOOBER NETWORK GROWTH</p>
+          <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest mt-1">BHUBEZI NETWORK GROWTH</p>
         </div>
       </div>
       <p className="text-xs font-bold text-gray-700 leading-tight">
-        Tell SA how cool it is to use <span className="bg-black text-yellow-400 px-1 font-black">BOOBER</span>. Score <span className="text-yellow-600 font-black">+{POINT_VALUES.AFFILIATE_SHARE} POINTS</span> per signup!
+        Tell SA how cool it is to use <span className="bg-black text-yellow-400 px-1 font-black">BHUBEZI</span>. Score <span className="text-yellow-600 font-black">+{POINT_VALUES.AFFILIATE_SHARE} POINTS</span> per signup!
       </p>
       
       <div className="grid grid-cols-4 gap-3">

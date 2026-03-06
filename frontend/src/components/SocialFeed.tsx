@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import type { UserProfile, SocialPost } from '../types';
 import { useContentModeration } from '../hooks/useContentModeration';
 import { Send, User as UserIcon, MessageSquare, ThumbsUp, Shield, Sparkles, Image as ImageIcon, X, AlertTriangle, CornerDownRight, Mic, Square } from 'lucide-react';
@@ -27,6 +27,16 @@ const SocialFeed: React.FC<Props> = ({ user, addPoints, posts, onLikePost, onRep
   const recordingIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
   
   const { containsLinks } = useContentModeration();
+
+  // Cleanup on component unmount
+  useEffect(() => {
+    return () => {
+      if (recordingIntervalRef.current) clearInterval(recordingIntervalRef.current);
+      if (mediaRecorderRef.current?.state === 'recording') {
+        mediaRecorderRef.current.stop();
+      }
+    };
+  }, []);
 
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -91,8 +101,7 @@ const SocialFeed: React.FC<Props> = ({ user, addPoints, posts, onLikePost, onRep
       recordingIntervalRef.current = setInterval(() => {
         setRecordingTime(t => t + 1);
       }, 1000);
-    } catch (err) {
-      console.error('Microphone error:', err);
+    } catch {
       alert('Could not access microphone. Please allow microphone access in your browser settings.');
     }
   };
@@ -365,4 +374,4 @@ const SocialFeed: React.FC<Props> = ({ user, addPoints, posts, onLikePost, onRep
   );
 };
 
-export default SocialFeed;
+export default React.memo(SocialFeed);
